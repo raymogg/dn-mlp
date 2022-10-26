@@ -21,6 +21,7 @@ mlp_file = open("./contracts/MLP.json")
 mlp_abi = json.load(mlp_file)["abi"]
 mlp = w3.eth.contract(abi=mlp_abi, address=mlp_address)
 
+# get array of all tokens held in MLP
 mlp_tokens = helpers.getMLPTokens(vault)
 
 # Vault
@@ -34,6 +35,11 @@ mlp_tokens = helpers.getMLPTokens(vault)
 
 total_exposure = helpers.usdExposure(vault, mlp_tokens, mlp, 1000000000000000000)
 print(total_exposure)
+
+# testing convert to raw dollar values
+# appears to be working accurately -> this gives exposure per asset
+for exposure in total_exposure:
+    print(str(exposure[0]) + ": " + str(w3.fromWei(float(exposure[1]), "ether")))
 
 # - getMaxPrice / getMinPrice
 # - token balances (exact tokens held by index?)

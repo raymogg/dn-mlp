@@ -29,7 +29,7 @@ def getTokenTargetWeight(vault, token):
 
 # Returns the token price reported by the MYC oracle for a given token
 def getTokenPrice(vault, token):
-    # todo this seems wrong - this should probably call the oracle of the token
+    # this calls the underlying oracle -> todo double confirm but seems pricing is fine.
     price = vault.functions.getMaxPrice(token).call()
     return price
 
@@ -52,6 +52,7 @@ def getTokensCurrentWeights(vault, tokens):
     return target_weights
 
 # Returns the amount of tokens held by the MLP vault for each token in the vault
+# dev: this retursn the held amount NOT the target amounts. This is "actual" exposure
 def getTokensUSDGAmounts(vault, tokens):
     amounts = []
     for token in tokens:
