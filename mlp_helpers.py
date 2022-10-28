@@ -77,3 +77,29 @@ def usdExposure(vault, tokens, mlp, mlp_balance):
     for token_amount_pair in token_amounts:
         token_shares.append([token_amount_pair[0], token_amount_pair[1] * share])
     return token_shares
+
+# Helper functions for account state / portfolio state
+def getMLPBalance(mlp, account):
+    return mlp.functions.balanceOf(account)
+
+def updateMLPBalance():
+    # todo buy MLP?
+    print("Updating MLP Balance")
+
+def getMLPRewards():
+    print("Claimable rewards")
+
+def claimMLPRewards():
+    print("Get rewards")
+
+def getMYCRewards():
+    print("MYC rewards")
+
+def claimMYCRewards():
+    print("Get MYC rewards")
+
+def getAssetHedge():
+    print("Getting asset hedge")
+
+def updateAssetHedge():
+    print("Updating asset hedge to new exposure")
