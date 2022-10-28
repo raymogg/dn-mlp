@@ -3,7 +3,8 @@ from web3 import Web3
 import os
 from dotenv import load_dotenv
 import json
-import helpers
+import mlp_helpers
+from strategy import Strategy
 
 load_dotenv()
 
@@ -22,27 +23,17 @@ mlp_abi = json.load(mlp_file)["abi"]
 mlp = w3.eth.contract(abi=mlp_abi, address=mlp_address)
 
 # get array of all tokens held in MLP
-mlp_tokens = helpers.getMLPTokens(vault)
+mlp_tokens = mlp_helpers.getMLPTokens(vault)
 
-# Vault
-# test get token weights
-# token_weights = helpers.getTokensTargetWeights(vault, mlp_tokens)
-# print(token_weights)
+# Initialise strategy
+# todo replace with actual account, placeholder for now
+strategy = Strategy(vault, mlp, mlp_tokens, "0x2bb8ab3c2a9837de97a83c228a07e16928b4f07f")
 
-# # test get current weights
-# target_weights = helpers.getTokensCurrentWeights(vault, mlp_tokens)
-# print(target_weights)
+# Strategy
+# Hedging -> check and hedge every 6 hours
 
-total_exposure = helpers.usdExposure(vault, mlp_tokens, mlp, 1000000000000000000)
-print(total_exposure)
+# MLP Rewards -> claim every 24 hours
 
-# testing convert to raw dollar values
-# appears to be working accurately -> this gives exposure per asset
-for exposure in total_exposure:
-    print(str(exposure[0]) + ": " + str(w3.fromWei(float(exposure[1]), "ether")))
-
-# - getMaxPrice / getMinPrice
-# - token balances (exact tokens held by index?)
-
+# MYC Rewards -> claim every 7 days
 
 # setup connection to hedging facility
