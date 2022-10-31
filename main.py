@@ -3,7 +3,7 @@ from web3 import Web3
 import os
 from dotenv import load_dotenv
 import json
-from execution import increasePositionToken
+from execution import decreasePositionToken, increasePositionToken
 import mlp_helpers
 from strategy import Strategy
 
@@ -50,6 +50,21 @@ increasePositionToken(
     account,
     w3
 )
+
+sleep(30)
+
+decreasePositionToken(
+    router,
+    vault,
+    "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+    "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    10000000000000000000,
+    False,
+    account,
+    w3
+)
+
+
 
 # Strategy
 # Hedging -> check and hedge every 6 hours
