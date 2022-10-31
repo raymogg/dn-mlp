@@ -28,10 +28,20 @@ def getTokenTargetWeight(vault, token):
     return Fraction(target, total)
 
 # Returns the token price reported by the MYC oracle for a given token
-def getTokenPrice(vault, token):
+def getTokenPrice(vault, token, isLong):
     # this calls the underlying oracle -> todo double confirm but seems pricing is fine.
-    price = vault.functions.getMaxPrice(token).call()
-    return price
+    if (isLong):
+        return vault.functions.getMaxPrice(token).call()
+    else:
+        return vault.functions.getMinPrice(token).call()
+
+def getTokenPriceWithSpread(vault, token, isLong):
+    price = getTokenPrice(vault, token, isLong)
+    if (isLong):
+        return price + (price * 0.001)
+    else:
+        return price - (price * 0.001)
+
 
 # Returns the token weight for agiven token
 def getTokenCurrentWeight(vault, token):

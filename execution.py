@@ -1,4 +1,7 @@
 # Helper class for executing trades against Mycelium Perp Swaps
+from mlp_helpers import getTokenPriceWithSpread
+
+
 referral_code = "0x0000000000000000000000000000000000000000000000000000000000000000"
 
 # increases position usign ERC20 as collat per https://swaps.docs.mycelium.xyz/developer-resources/contract-interactions
@@ -13,12 +16,7 @@ def increasePositionToken(router, vault, token_in, target_token, collateral_amou
     execution_fee = 150000000000000 #todo
     nonce = w3.eth.get_transaction_count(account.address)
 
-    # use current oracle price + accepted deviation to price order
-    # todo improve pricing here / verify safety
-    oracle_price = vault.functions.getMinPrice(target_token).call()
-    price_with_slippage = oracle_price - (oracle_price * 0.001)
-    print(int(price_with_slippage))
-    print(oracle_price)
+    price_with_spread = getTokenPriceWithSpread(vault, target_token, is_long)
 
     transaction = router.functions.createIncreasePosition(
         [token_in],
@@ -27,7 +25,7 @@ def increasePositionToken(router, vault, token_in, target_token, collateral_amou
         0,
         size_delta,
         is_long,
-        int(price_with_slippage),
+        int(price_with_spread),
         execution_fee,
         referral_code
     ).build_transaction({
@@ -55,14 +53,16 @@ def decreasePositionToken(router, vault, token_out, target_token, collateral_amo
     # use current oracle price + accepted deviation to price order
     # todo improve pricing here / verify safety
     oracle_price = vault.functions.getMinPrice(target_token).call()
-    price_with_slippage = oracle_price - (oracle_price * 0.005)
+    price_with_slippage = oracle_price + (oracle_price * 0.005)
     print(int(price_with_slippage))
     print(oracle_price)
+    # invert is long because closing a short -> want max price. Closing a long -> want min price to avoid issues.
+    price_with_spread = getTokenPriceWithSpread(vault, target_token, not is_long)
 
     # todo switch based on long and short here
     # size_delta = int((collateral_amount_out * price_with_slippage) / 10**12)
     collateral_amount_out *= 10**12
-    size_delta = collateral_amount_out * 10**12
+    size_delta = collateral_amount_out
 
     transaction = router.functions.createDecreasePosition(
         [token_out],
@@ -71,7 +71,7 @@ def decreasePositionToken(router, vault, token_out, target_token, collateral_amo
         size_delta,
         is_long,
         account.address,
-        int(price_with_slippage),
+        int(price_with_spread),
         0,
         execution_fee,
         False
