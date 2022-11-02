@@ -35,39 +35,42 @@ print("Running with account: " + account.address)
 
 # get array of all tokens held in MLP
 mlp_tokens = mlp_helpers.getMLPTokens(vault)
+# hedge WETH and WBTC
+tokens_to_hedge = ["0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"]
 
 # Initialise strategy
-# strategy = Strategy(vault, mlp, mlp_tokens, account, w3)
+strategy = Strategy(vault, mlp, mlp_tokens, tokens_to_hedge, account, w3)
 
-increasePositionToken(
-    router,
-    vault,
-    "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
-    "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-    10000000000000000000,
-    2,
-    False,
-    account,
-    w3
-)
+# increasePositionToken(
+#     router,
+#     vault,
+#     "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+#     "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+#     10000000000000000000,
+#     2,
+#     False,
+#     account,
+#     w3
+# )
 
-sleep(30)
+# sleep(30)
 
-decreasePositionToken(
-    router,
-    vault,
-    "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
-    "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-    10000000000000000000,
-    False,
-    account,
-    w3
-)
+# decreasePositionToken(
+#     router,
+#     vault,
+#     "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+#     "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+#     10000000000000000000,
+#     False,
+#     account,
+#     w3
+# )
 
 
 
 # Strategy
 # Hedging -> check and hedge every 6 hours
+strategy.update_hedges()
 
 # MLP Rewards -> claim every 24 hours
 
