@@ -1,12 +1,14 @@
 import mlp_helpers
 import position_helpers
+import execution
 class Strategy():
     # class for managing the stategy.
     # will hold initial state and allow execution of updates / update internal balances when this happens
     
-    def __init__(self, vault, reader, mlp, tokens, tokens_to_hedge, tokens_as_collateral, account, w3):
+    def __init__(self, vault, reader, router, mlp, tokens, tokens_to_hedge, tokens_as_collateral, account, w3):
         self.vault = vault
         self.reader = reader
+        self.router = router
         self.mlp = mlp
         self.mlp_tokens = tokens
         self.mlp_tokens_to_hedge = tokens_to_hedge
@@ -40,15 +42,64 @@ class Strategy():
         # update mlp exposure
         self.update_mlp_exposure()
 
-        # for each asset being hedged, update position
+        # todo compute target exposure
+        target_exposure = {
+            "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1": -35000000000000000000000000000000,
+            "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f": -35000000000000000000000000000000
+        }
+
+        # get current exposure for ETH and BTC
         exposure = position_helpers.get_current_exposure(self.vault, self.reader, self.account.address, self.tokens_as_collateral, self.mlp_tokens_to_hedge)
-        # for asset in self.mlp_tokens_to_hedge:
-        #     print("---- HEDGING ----")
-        #     print(asset)
-        #     print("USD Value: $" + str(self.total_exposure[asset]))
-        #     exposure = position_helpers.get_current_exposure(self.vault, self.reader)
-
-            # get hedge delta for asset
-
-            # perform update using execution.py
         
+        # compute required delta
+        exposure_delta = position_helpers.get_hedge_delta(self.vault, exposure, target_exposure)
+
+        # perform update using execution.py
+        for asset in exposure_delta.keys():
+            # make trade of size exposure_delta[asset]
+            raw_size = exposure_delta[asset][0]
+
+            if raw_size != 0:
+
+                size = int(abs(raw_size) / 10**12)
+                is_long = True if raw_size > 0 else False
+
+                if (abs(raw_size) > abs(target_exposure[asset])):
+                    # decrease exposure
+                    print("decreasing exposure")
+                    print(asset)
+                    print(exposure_delta)
+                    print(exposure_delta[asset][1])
+                    print(size)
+                    print(is_long)
+                    execution.decreasePositionToken(
+                        self.router,
+                        self.vault,
+                        "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+                        asset,
+                        exposure_delta[asset][1],
+                        size,
+                        is_long,
+                        self.account,
+                        self.w3
+                    )
+                else:
+                    # increase exposure
+                    print("increasing exposure")
+                    print(asset)
+                    print(exposure_delta)
+                    print(exposure_delta[asset][1])
+                    print(size)
+                    print(is_long)
+                    execution.increasePositionToken(
+                        self.router,
+                        self.vault,
+                        "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+                        asset,
+                        exposure_delta[asset][1],
+                        size,
+                        is_long,
+                        self.account,
+                        self.w3
+                    )
+

@@ -11,8 +11,7 @@ referral_code = "0x0000000000000000000000000000000000000000000000000000000000000
 # leverage -> integer amount of leverage being taken -> todo might be better ways to pass in this param
 # size_delta -> USD value of change in position size. 10^30 units
 # price -> USD price in 10^30 units
-def increasePositionToken(router, vault, token_in, target_token, collateral_amount, leverage, is_long, account, w3):
-    size_delta = collateral_amount * leverage * 10**12
+def increasePositionToken(router, vault, token_in, target_token, collateral_amount_in, size_delta, is_long, account, w3):
     execution_fee = 150000000000000 #todo
     nonce = w3.eth.get_transaction_count(account.address)
 
@@ -21,7 +20,7 @@ def increasePositionToken(router, vault, token_in, target_token, collateral_amou
     transaction = router.functions.createIncreasePosition(
         [token_in],
         target_token,
-        collateral_amount,
+        collateral_amount_in,
         0,
         size_delta,
         is_long,
@@ -30,7 +29,7 @@ def increasePositionToken(router, vault, token_in, target_token, collateral_amou
         referral_code
     ).build_transaction({
         'chainId': 42161,
-        'gas': 2000000,
+        'gas': 3000000,
         'maxFeePerGas': w3.toWei('0.1', 'gwei'),
         'maxPriorityFeePerGas': w3.toWei('0.1', 'gwei'),
         'nonce': nonce,
@@ -46,7 +45,7 @@ def increasePositionToken(router, vault, token_in, target_token, collateral_amou
 
 
 # decreases position using ERC20 as collat per https://swaps.docs.mycelium.xyz/developer-resources/contract-interactions
-def decreasePositionToken(router, vault, token_out, target_token, collateral_amount_out, is_long, account, w3):
+def decreasePositionToken(router, vault, token_out, target_token, collateral_amount_out, size_delta, is_long, account, w3):
     execution_fee = 150000000000000 #todo
     nonce = w3.eth.get_transaction_count(account.address)
 
@@ -59,15 +58,10 @@ def decreasePositionToken(router, vault, token_out, target_token, collateral_amo
     # invert is long because closing a short -> want max price. Closing a long -> want min price to avoid issues.
     price_with_spread = getTokenPriceWithSpread(vault, target_token, not is_long)
 
-    # todo switch based on long and short here
-    # size_delta = int((collateral_amount_out * price_with_slippage) / 10**12)
-    collateral_amount_out *= 10**12
-    size_delta = collateral_amount_out
-
     transaction = router.functions.createDecreasePosition(
         [token_out],
         target_token,
-        0,
+        collateral_amount_out,
         size_delta,
         is_long,
         account.address,
@@ -77,9 +71,9 @@ def decreasePositionToken(router, vault, token_out, target_token, collateral_amo
         False
     ).build_transaction({
         'chainId': 42161,
-        'gas': 2000000,
-        'maxFeePerGas': w3.toWei('0.1', 'gwei'),
-        'maxPriorityFeePerGas': w3.toWei('0.1', 'gwei'),
+        'gas': 3000000,
+        'maxFeePerGas': w3.toWei('0.15', 'gwei'),
+        'maxPriorityFeePerGas': w3.toWei('0.15', 'gwei'),
         'nonce': nonce,
         'value': execution_fee
     })
