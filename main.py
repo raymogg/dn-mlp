@@ -29,6 +29,11 @@ router_file = open("./contracts/PositionRouter.json")
 router_abi = json.load(router_file)["abi"]
 router = w3.eth.contract(abi=router_abi, address=router_address)
 
+reader_address = os.getenv("READER")
+reader_file = open("./contracts/Reader.json")
+reader_abi = json.load(reader_file)["abi"]
+reader = w3.eth.contract(abi=reader_abi, address=reader_address)
+
 private_key = os.getenv("PRIVATE_KEY")
 account = w3.eth.account.from_key(private_key)
 print("Running with account: " + account.address)
@@ -37,9 +42,10 @@ print("Running with account: " + account.address)
 mlp_tokens = mlp_helpers.getMLPTokens(vault)
 # hedge WETH and WBTC
 tokens_to_hedge = ["0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"]
-
+# WETH, WBTC and DAI for collateral
+tokens_as_collateral = ["0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"]
 # Initialise strategy
-strategy = Strategy(vault, mlp, mlp_tokens, tokens_to_hedge, account, w3)
+strategy = Strategy(vault, reader, mlp, mlp_tokens, tokens_to_hedge, tokens_as_collateral, account, w3)
 
 # increasePositionToken(
 #     router,

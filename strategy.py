@@ -4,11 +4,13 @@ class Strategy():
     # class for managing the stategy.
     # will hold initial state and allow execution of updates / update internal balances when this happens
     
-    def __init__(self, vault, mlp, tokens, tokens_to_hedge, account, w3):
+    def __init__(self, vault, reader, mlp, tokens, tokens_to_hedge, tokens_as_collateral, account, w3):
         self.vault = vault
+        self.reader = reader
         self.mlp = mlp
         self.mlp_tokens = tokens
         self.mlp_tokens_to_hedge = tokens_to_hedge
+        self.tokens_as_collateral = tokens_as_collateral
         self.account = account
         self.mlp_balance = 0
         # map from asset to USD exposure in MLP
@@ -31,17 +33,21 @@ class Strategy():
         # todo uncomment when ready
         # self.mlp_balance = account.getMLPBalance(self.mlp, "0x2bb8ab3c2a9837de97a83c228a07e16928b4f07f")
         self.mlp_balance = 1000000000000000000
+
+
     
     def update_hedges(self):
         # update mlp exposure
         self.update_mlp_exposure()
 
         # for each asset being hedged, update position
-        for asset in self.mlp_tokens_to_hedge:
-            print("---- HEDGING ----")
-            print(asset)
-            print("USD Value: $" + str(self.total_exposure[asset]))
-            exposure = position_helpers.get_current_exposure(self.vault, asset)
+        exposure = position_helpers.get_current_exposure(self.vault, self.reader, self.account.address, self.tokens_as_collateral, self.mlp_tokens_to_hedge)
+        # for asset in self.mlp_tokens_to_hedge:
+        #     print("---- HEDGING ----")
+        #     print(asset)
+        #     print("USD Value: $" + str(self.total_exposure[asset]))
+        #     exposure = position_helpers.get_current_exposure(self.vault, self.reader)
+
             # get hedge delta for asset
 
             # perform update using execution.py
