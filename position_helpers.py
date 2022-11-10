@@ -36,14 +36,18 @@ def get_current_exposure(vault, reader, account, collateral_tokens, index_tokens
 def get_hedge_delta(vault, current_exposures, target_exposures):
     exposure_deltas = {}
     for asset in current_exposures.keys():
-        # todo this is messy. current_exposures[0] is because this is returned from get_current_exposure
-        exposure_deltas[asset] = []
-        exposure_deltas[asset].append(target_exposures[asset] - current_exposures[asset][0])
-        # compute amount of stablecoins in or out to keep same leverage
-        current_leverage = abs(current_exposures[asset][0]) / current_exposures[asset][1]
-        # todo all positions will need a target leverage to be opened with
-        collat_delta = 0
-        exposure_deltas[asset].append(0)
+        if (current_exposures[asset][0] != 0):
+            # todo this is messy. current_exposures[0] is because this is returned from get_current_exposure
+            exposure_deltas[asset] = []
+            exposure_deltas[asset].append(target_exposures[asset] - current_exposures[asset][0])
+            # compute amount of stablecoins in or out to keep same leverage
+            current_leverage = abs(current_exposures[asset][0]) / current_exposures[asset][1]
+            # todo all positions will need a target leverage to be opened with
+            collat_delta = 0
+            exposure_deltas[asset].append(0)
+        else:
+            exposure_deltas[asset] = [0, 0]
+
 
     print(exposure_deltas)
     return exposure_deltas

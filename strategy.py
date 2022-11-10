@@ -61,7 +61,7 @@ class Strategy():
 
             if raw_size != 0:
 
-                size = int(abs(raw_size) / 10**12)
+                size = int(abs(raw_size))
                 is_long = True if raw_size > 0 else False
 
                 if (abs(raw_size) > abs(target_exposure[asset])):
