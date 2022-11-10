@@ -39,12 +39,17 @@ def get_hedge_delta(vault, current_exposures, target_exposures):
         if (current_exposures[asset][0] != 0):
             # todo this is messy. current_exposures[0] is because this is returned from get_current_exposure
             exposure_deltas[asset] = []
-            exposure_deltas[asset].append(target_exposures[asset] - current_exposures[asset][0])
+            target_size = target_exposures[asset] - current_exposures[asset][0]
+            exposure_deltas[asset].append(int(target_size))
             # compute amount of stablecoins in or out to keep same leverage
             current_leverage = abs(current_exposures[asset][0]) / current_exposures[asset][1]
+            print("current leverage: " + str(current_leverage))
             # todo all positions will need a target leverage to be opened with
-            collat_delta = 0
-            exposure_deltas[asset].append(0)
+            new_collateral_amount = (abs(target_exposures[asset])) / current_leverage
+            print("new collat amount: " + str(new_collateral_amount))
+            collat_delta = (current_exposures[asset][1]) - new_collateral_amount
+            print("collat delta: " + str(collat_delta))
+            exposure_deltas[asset].append(int(collat_delta))
         else:
             exposure_deltas[asset] = [0, 0]
 

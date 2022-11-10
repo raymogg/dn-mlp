@@ -42,9 +42,9 @@ class Strategy():
         # update mlp exposure
         self.update_mlp_exposure()
 
-        # todo compute target exposure
+        # todo compute target exposure and leverage
         target_exposure = {
-            "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1": -35000000000000000000000000000000,
+            "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1": -30000000000000000000000000000000,
             "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f": -35000000000000000000000000000000
         }
 
@@ -62,14 +62,15 @@ class Strategy():
             if raw_size != 0:
 
                 size = int(abs(raw_size))
-                is_long = True if raw_size > 0 else False
+                # long is based on current exposure
+                is_long = True if exposure[asset][0] > 0 else False
 
-                if (abs(raw_size) > abs(target_exposure[asset])):
+                # compare current exposure to target exposure
+                if (abs(exposure[asset][0]) > abs(target_exposure[asset])):
                     # decrease exposure
                     print("decreasing exposure")
                     print(asset)
                     print(exposure_delta)
-                    print(exposure_delta[asset][1])
                     print(size)
                     print(is_long)
                     execution.decreasePositionToken(
@@ -88,18 +89,17 @@ class Strategy():
                     print("increasing exposure")
                     print(asset)
                     print(exposure_delta)
-                    print(exposure_delta[asset][1])
                     print(size)
                     print(is_long)
-                    execution.increasePositionToken(
-                        self.router,
-                        self.vault,
-                        "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
-                        asset,
-                        exposure_delta[asset][1],
-                        size,
-                        is_long,
-                        self.account,
-                        self.w3
-                    )
+                    # execution.increasePositionToken(
+                    #     self.router,
+                    #     self.vault,
+                    #     "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+                    #     asset,
+                    #     exposure_delta[asset][1],
+                    #     size,
+                    #     is_long,
+                    #     self.account,
+                    #     self.w3
+                    # )
 
